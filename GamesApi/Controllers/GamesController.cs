@@ -3,51 +3,67 @@ using GamesApi.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GamesApi.Controllers;
+
 [ApiController]
 [Route("api/[controller]")]
-public class GamesController : ControllerBase {
+public class GamesController : ControllerBase
+{
+
     [HttpGet]
-    public ActionResult<List<Game>> GetAll() {
+    public ActionResult<List<Game>> GetAll()
+    {
         return Ok(GamesStore.Games);
     }
 
+    [HttpGet("favourites")]
+    public ActionResult<List<Game>> GetFavourites()
+    {
+        var favourites = GamesStore.Games.Where(g => g.IsFavourite).ToList();
+        return Ok(favourites);
+    }
+
     [HttpGet("{id}")]
-    public ActionResult<Game> GetById(int id) {
+    public ActionResult<Game> GetById(int id)
+    {
         var game = GamesStore.Games.FirstOrDefault(g => g.Id == id);
-        if (game is null) {
-            return NotFound(new { message = $"Игра с id={id} не найдено" });
-        }
+        if (game is null)
+            return NotFound(new { message = $"Игра с id={id} не найдена" });
         return Ok(game);
     }
 
     [HttpPost]
-    public ActionResult<Game> Create([FromBody] Game game) {
+    public ActionResult<Game> Create([FromBody] Game game)
+    {
+        if (string.IsNullOrWhiteSpace(game.Title))
+        {
+            return BadRequest(new { message = "Название игры не может быть пустым" });
+        }
+
         game.Id = GamesStore.NextId();
         GamesStore.Games.Add(game);
         return CreatedAtAction(nameof(GetById), new { id = game.Id }, game);
     }
 
     [HttpDelete("{id}")]
-    public ActionResult Delete(int id) {
+    public ActionResult Delete(int id)
+    {
         var game = GamesStore.Games.FirstOrDefault(g => g.Id == id);
-        if (game is null) {
-            return NotFound(new {message = $"Игра с id={id} не найдена"});   
-        }
+        if (game is null)
+            return NotFound(new { message = $"Игра с id={id} не найдена" });
         GamesStore.Games.Remove(game);
         return NoContent();
     }
 
     [HttpPut("{id}")]
-    public ActionResult<Game> Update(int id, [FromBody] Game updated) {
+    public ActionResult<Game> Update(int id, [FromBody] Game updated)
+    {
         var game = GamesStore.Games.FirstOrDefault(g => g.Id == id);
-        if (game is null) {
+        if (game is null)
             return NotFound(new { message = $"Игра с id={id} не найдена" });
-        }
         game.Title = updated.Title;
         game.Genre = updated.Genre;
         game.ReleaseYear = updated.ReleaseYear;
+        game.IsFavourite = updated.IsFavourite;
         return Ok(game);
     }
-
-    
 }
