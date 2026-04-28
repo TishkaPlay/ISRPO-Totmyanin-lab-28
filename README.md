@@ -19,8 +19,8 @@ dotnet run
 
 ## Таблица всем маршрутов:
 
-![table1](img\table1.png)
+![table1](table1.png)
 
 ## Что мы изучили в лабораторной работе:
 
-![table2](img\table2.png)
+![table2](table2.png)
